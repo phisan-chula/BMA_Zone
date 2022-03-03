@@ -54,7 +54,7 @@ def Restructure(ZONE, DSTR):
 ############################################################################
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('-f', '--format', dest='tablefmt', default='pretty',
+parser.add_argument('-f', '--format', dest='tablefmt', default='github',
                     help='table formats : pretty, html ')
 
 args = parser.parse_args()
@@ -66,15 +66,17 @@ dfAbbrZone = Restructure(ZONE, DSTR)
 for name,group in dfAbbrZone.groupby( ['z_code'] ):
     POPU = group.no_popu.sum()
     AREA = group.AREA_KM.sum()
+    ZONE_HDR = f'\n===กลุ่มเขต: {name}   ประชากร:{POPU:,d} พื้นที่กลุ่มเขต: {AREA:.1f} ตร.กม. ===\n'
     if args.tablefmt=='html':
-        print( f'<header><h1>Zone: {name} Popu:{POPU:,d} Area: {AREA:.1f} SQ.KM.<ht></header>')
+        print( '<header><h1>'+ZONE_HDR+'</h1></header>' )
     else:
-        print( f'===กลุ่มเขต: {name}   ประชากร:{POPU:,d} พื้นที่กลุ่มเขต: {AREA:.1f} ตร.กม. ===')
+        print( ZONE_HDR )
     tab =  group[['ZONE_SEQ','z_name','DNAME_ABB','dname','AREA_KM','no_popu']].copy()
     tab['no_popu'] = tab['no_popu'].map( '{:,d}'.format )
-    print( tabulate( tab ,  tablefmt=args.tablefmt, headers=['CODE', 'District',
-         'Zone','เขต','พื้นที่ ตร.กม.','ประชากร'  ], showindex=False) )
+    print( tabulate( tab ,  tablefmt=args.tablefmt, headers=['CODE', 'กลุ่มเขต',
+         'DSTRCT8','เขต','พื้นที่ ตร.กม.','ประชากร'  ],  showindex=False) )
 #import pdb; pdb.set_trace()
-if 0:
+if 1:
+    print(f'Writing geopackage "dfAbbrZone.gpkg"...')
     dfAbbrZone.to_file('dfAbbrZone.gpkg', layer='District', driver='GPKG' )
 
